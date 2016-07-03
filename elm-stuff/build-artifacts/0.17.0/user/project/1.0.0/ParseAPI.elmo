@@ -1,0 +1,84 @@
+var _user$project$ParseAPI$trailingSlash = function (url) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		url,
+		A2(_elm_lang$core$String$endsWith, '/', url) ? '' : '/');
+};
+var _user$project$ParseAPI$appendToURL = F2(
+	function (url, str) {
+		return _user$project$ParseAPI$trailingSlash(
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				_user$project$ParseAPI$trailingSlash(url),
+				str));
+	});
+var _user$project$ParseAPI$pathURL = F2(
+	function (url, pathList) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_elm_lang$core$Basics$flip(_user$project$ParseAPI$appendToURL),
+			url,
+			pathList);
+	});
+var _user$project$ParseAPI$find = F4(
+	function (credentials, $class, query, decoder) {
+		var urlQuery = A2(
+			_evancz$elm_http$Http$url,
+			A2(
+				_user$project$ParseAPI$pathURL,
+				credentials.url,
+				_elm_lang$core$Native_List.fromArray(
+					['classes', $class])),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'where',
+					_1: A2(
+						_elm_lang$core$Json_Encode$encode,
+						0,
+						_elm_lang$core$Json_Encode$object(query))
+				}
+				]));
+		var resultsDecoder = A2(
+			_elm_lang$core$Json_Decode_ops[':='],
+			'results',
+			_elm_lang$core$Json_Decode$list(decoder));
+		return A2(_evancz$elm_http$Http$get, resultsDecoder, urlQuery);
+	});
+var _user$project$ParseAPI$headers = function (creds) {
+	return _elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'X-Parse-Application-Id', _1: creds.appId},
+			{ctor: '_Tuple2', _0: 'X-Parse-REST-API-Key', _1: creds.apiKey},
+			{ctor: '_Tuple2', _0: 'Origin', _1: 'http://10.0.0.22:1337'}
+		]);
+};
+var _user$project$ParseAPI$create = F3(
+	function (credentials, $class, value) {
+		return A2(
+			_evancz$elm_http$Http$send,
+			_evancz$elm_http$Http$defaultSettings,
+			{
+				verb: 'POST',
+				headers: A2(
+					_elm_lang$core$List_ops['::'],
+					{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'},
+					_user$project$ParseAPI$headers(credentials)),
+				url: A2(
+					_user$project$ParseAPI$pathURL,
+					credentials.url,
+					_elm_lang$core$Native_List.fromArray(
+						['classes', $class])),
+				body: _evancz$elm_http$Http$string(
+					A2(_elm_lang$core$Json_Encode$encode, 0, value))
+			});
+	});
+var _user$project$ParseAPI$Credentials = F3(
+	function (a, b, c) {
+		return {appId: a, apiKey: b, url: c};
+	});
+var _user$project$ParseAPI$Options = F6(
+	function (a, b, c, d, e, f) {
+		return {order: a, limit: b, skip: c, keys: d, include: e, count: f};
+	});

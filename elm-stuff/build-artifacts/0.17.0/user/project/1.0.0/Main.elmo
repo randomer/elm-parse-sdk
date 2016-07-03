@@ -1,0 +1,112 @@
+var _user$project$Main$subscriptions = function (model) {
+	var _p0 = model;
+	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Main$creds = {appId: '123', apiKey: '123', url: 'http://10.0.0.22:1337/'};
+var _user$project$Main$initModel = {response: _elm_lang$core$Maybe$Nothing, data: ''};
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$initModel, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$Model = F2(
+	function (a, b) {
+		return {response: a, data: b};
+	});
+var _user$project$Main$ResponseSuccess = {ctor: 'ResponseSuccess'};
+var _user$project$Main$ResponseError = {ctor: 'ResponseError'};
+var _user$project$Main$requestCmd = function (data) {
+	return A3(
+		_elm_lang$core$Task$perform,
+		function (error) {
+			return A2(_elm_lang$core$Debug$log, 'error', _user$project$Main$ResponseError);
+		},
+		function (response) {
+			return A2(_elm_lang$core$Debug$log, 'success', _user$project$Main$ResponseSuccess);
+		},
+		A3(
+			_user$project$ParseAPI$create,
+			_user$project$Main$creds,
+			'scrape',
+			_elm_lang$core$Json_Encode$string(data)));
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'GotResponse':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							response: _elm_lang$core$Maybe$Just(_p1._0)
+						}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'DataInput':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{data: _p1._0}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'MakeRequest':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Main$requestCmd(model.data)
+				};
+			case 'ResponseError':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+		}
+	});
+var _user$project$Main$MakeRequest = {ctor: 'MakeRequest'};
+var _user$project$Main$DataInput = function (a) {
+	return {ctor: 'DataInput', _0: a};
+};
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$type$('text'),
+						_elm_lang$html$Html_Events$onInput(
+						function (textInput) {
+							return _user$project$Main$DataInput(textInput);
+						})
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onClick(_user$project$Main$MakeRequest)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Make request')
+					]))
+			]));
+};
+var _user$project$Main$main = {
+	main: _elm_lang$html$Html_App$program(
+		{init: _user$project$Main$init, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions, view: _user$project$Main$view})
+};
+var _user$project$Main$GotResponse = function (a) {
+	return {ctor: 'GotResponse', _0: a};
+};
