@@ -90,16 +90,14 @@ type alias Options =
 
 query : Credentials -> Query doc msg
 query credentials class query decoder onError onSucceed =
-    let
-        resultsDecoder =
-            ("results" := JsonD.list decoder)
-
-        urlQuery =
-            Http.url (pathURL credentials.url [ "classes", class ])
-                [ ( "where", JsonE.encode 0 (JsonE.object query) ) ]
-    in
-        Http.get resultsDecoder urlQuery
-            |> Task.perform onError onSucceed
+    Http.send Http.defaultSettings
+        { verb = "GET"
+        , headers = ( "Content-Type", "application/json" ) :: (headers credentials)
+        , url = pathURL credentials.url [ "classes", class ]
+        , body = Http.string "hello"
+        }
+        |> Http.fromJson ("results" := JsonD.list decoder)
+        |> Task.perform onError onSucceed
 
 
 init : Credentials -> ParseSdk doc msg
