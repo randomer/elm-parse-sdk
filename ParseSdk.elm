@@ -1,4 +1,4 @@
-module ParseSdk exposing (create, find)
+module ParseSdk exposing (init, Credentials)
 
 import Http
 import Json.Encode as JsonE
@@ -8,6 +8,12 @@ import String
 
 
 -- TYPES
+
+
+type alias ParseSdk doc =
+    { create : String -> JsonE.Value -> Task.Task Http.RawError Http.Response
+    , query : String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
+    }
 
 
 type alias Credentials =
@@ -60,10 +66,6 @@ create credentials class value =
         }
 
 
-
--- QUERIES
-
-
 type alias Options =
     { order : Maybe (List String)
     , limit : Maybe Int
@@ -74,8 +76,8 @@ type alias Options =
     }
 
 
-find : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
-find credentials class query decoder =
+query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
+query credentials class query decoder =
     let
         resultsDecoder =
             ("results" := JsonD.list decoder)
@@ -85,3 +87,10 @@ find credentials class query decoder =
                 [ ( "where", JsonE.encode 0 (JsonE.object query) ) ]
     in
         Http.get resultsDecoder urlQuery
+
+
+init : Credentials -> ParseSdk doc
+init credentials =
+    { create = create credentials
+    , query = query credentials
+    }
