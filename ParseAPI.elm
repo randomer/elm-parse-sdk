@@ -22,7 +22,6 @@ headers : Credentials -> List (String, String)
 headers creds =
   [ ("X-Parse-Application-Id", creds.appId)
   , ("X-Parse-REST-API-Key", creds.apiKey)
-  --, ("Origin" , "http://10.0.0.22:1337")
   ]
 
 trailingSlash : String -> String
