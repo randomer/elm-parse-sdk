@@ -1,4 +1,4 @@
-module ParseSdk exposing (init, Credentials)
+module ParseSdk exposing (init, Credentials, ParseSdk)
 
 import Http
 import Json.Encode as JsonE
