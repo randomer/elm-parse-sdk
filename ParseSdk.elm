@@ -10,9 +10,17 @@ import String
 -- TYPES
 
 
+type alias Create msg =
+    String -> (Http.RawError -> msg) -> (Http.Response -> msg) -> JsonE.Value -> Cmd msg
+
+
+type alias Query doc msg =
+    String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
+
+
 type alias ParseSdk doc msg =
-    { create : String -> (Http.RawError -> msg) -> (Http.Response -> msg) -> JsonE.Value -> Cmd msg
-    , query : String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
+    { create : Create msg
+    , query : Query doc msg
     }
 
 
@@ -56,7 +64,7 @@ pathURL url pathList =
 -- OBJECTS
 
 
-create : Credentials -> String -> (Http.RawError -> msg) -> (Http.Response -> msg) -> JsonE.Value -> Cmd msg
+create : Credentials -> Create msg
 create credentials class onError onResult value =
     Http.send Http.defaultSettings
         { verb = "POST"
@@ -80,7 +88,7 @@ type alias Options =
     }
 
 
-query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
+query : Credentials -> Query doc msg
 query credentials class query decoder onError onResult =
     let
         resultsDecoder =
