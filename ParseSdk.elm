@@ -77,10 +77,6 @@ type alias Options =
     }
 
 
-
--- query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
-
-
 query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
 query credentials class query decoder onError onResult =
     let
