@@ -67,6 +67,9 @@ create credentials class onError onResult value =
         |> Task.perform onError onResult
 
 
+{-| http://parse.com/docs/rest/guide#queries-query-constraints
+-- NOTE: Not used yet
+-}
 type alias Options =
     { order : Maybe (List String)
     , limit : Maybe Int
