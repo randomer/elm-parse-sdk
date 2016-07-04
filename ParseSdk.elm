@@ -10,9 +10,9 @@ import String
 -- TYPES
 
 
-type alias ParseSdk doc =
-    { create : String -> JsonE.Value -> Task.Task Http.RawError Http.Response
-    , query : String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
+type alias ParseSdk doc msg =
+    { create : String -> (Http.RawError -> msg) -> (Http.Response -> msg) -> JsonE.Value -> Cmd msg
+    , query : String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
     }
 
 
@@ -56,14 +56,15 @@ pathURL url pathList =
 -- OBJECTS
 
 
-create : Credentials -> String -> JsonE.Value -> Task.Task Http.RawError Http.Response
-create credentials class value =
+create : Credentials -> String -> (Http.RawError -> msg) -> (Http.Response -> msg) -> JsonE.Value -> Cmd msg
+create credentials class onError onResult value =
     Http.send Http.defaultSettings
         { verb = "POST"
         , headers = ( "Content-Type", "application/json" ) :: (headers credentials)
         , url = pathURL credentials.url [ "classes", class ]
         , body = Http.string <| JsonE.encode 0 value
         }
+        |> Task.perform onError onResult
 
 
 type alias Options =
@@ -76,8 +77,12 @@ type alias Options =
     }
 
 
-query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
-query credentials class query decoder =
+
+-- query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> Task.Task Http.Error (List doc)
+
+
+query : Credentials -> String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
+query credentials class query decoder onError onResult =
     let
         resultsDecoder =
             ("results" := JsonD.list decoder)
@@ -87,9 +92,10 @@ query credentials class query decoder =
                 [ ( "where", JsonE.encode 0 (JsonE.object query) ) ]
     in
         Http.get resultsDecoder urlQuery
+            |> Task.perform onError onResult
 
 
-init : Credentials -> ParseSdk doc
+init : Credentials -> ParseSdk doc msg
 init credentials =
     { create = create credentials
     , query = query credentials
