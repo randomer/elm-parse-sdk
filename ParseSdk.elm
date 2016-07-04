@@ -65,18 +65,18 @@ pathURL url pathList =
 
 
 create : Credentials -> Create msg
-create credentials class onError onResult value =
+create credentials class onError onSucceed value =
     Http.send Http.defaultSettings
         { verb = "POST"
         , headers = ( "Content-Type", "application/json" ) :: (headers credentials)
         , url = pathURL credentials.url [ "classes", class ]
         , body = Http.string <| JsonE.encode 0 value
         }
-        |> Task.perform onError onResult
+        |> Task.perform onError onSucceed
 
 
 {-| http://parse.com/docs/rest/guide#queries-query-constraints
--- NOTE: Not used yet
+  NOTE: Not used yet
 -}
 type alias Options =
     { order : Maybe (List String)
@@ -89,7 +89,7 @@ type alias Options =
 
 
 query : Credentials -> Query doc msg
-query credentials class query decoder onError onResult =
+query credentials class query decoder onError onSucceed =
     let
         resultsDecoder =
             ("results" := JsonD.list decoder)
@@ -99,7 +99,7 @@ query credentials class query decoder onError onResult =
                 [ ( "where", JsonE.encode 0 (JsonE.object query) ) ]
     in
         Http.get resultsDecoder urlQuery
-            |> Task.perform onError onResult
+            |> Task.perform onError onSucceed
 
 
 init : Credentials -> ParseSdk doc msg
