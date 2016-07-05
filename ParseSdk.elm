@@ -94,7 +94,7 @@ query credentials class query decoder onError onSucceed =
         { verb = "GET"
         , headers = ( "Content-Type", "application/json" ) :: (headers credentials)
         , url = pathURL credentials.url [ "classes", class ]
-        , body = Http.string "hello"
+        , body = Http.empty
         }
         |> Http.fromJson ("results" := JsonD.list decoder)
         |> Task.perform onError onSucceed
