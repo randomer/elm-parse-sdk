@@ -18,9 +18,14 @@ type alias Query doc msg =
     String -> List ( String, JsonE.Value ) -> JsonD.Decoder doc -> (Http.Error -> msg) -> (List doc -> msg) -> Cmd msg
 
 
+type alias Get doc msg =
+    String -> String -> JsonD.Decoder doc -> (Http.Error -> msg) -> (doc -> msg) -> Cmd msg
+
+
 type alias ParseSdk doc msg =
     { create : Create msg
     , query : Query doc msg
+    , get : Get doc msg
     }
 
 
@@ -100,8 +105,21 @@ query credentials class query decoder onError onSucceed =
         |> Task.perform onError onSucceed
 
 
+get : Credentials -> Get doc msg
+get credentials class objectId decoder onError onSucceed =
+    Http.send Http.defaultSettings
+        { verb = "GET"
+        , headers = ( "Content-Type", "application/json" ) :: (headers credentials)
+        , url = pathURL credentials.url [ "classes", class, objectId ]
+        , body = Http.empty
+        }
+        |> Http.fromJson decoder
+        |> Task.perform onError onSucceed
+
+
 init : Credentials -> ParseSdk doc msg
 init credentials =
     { create = create credentials
     , query = query credentials
+    , get = get credentials
     }
